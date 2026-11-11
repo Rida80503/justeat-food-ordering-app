@@ -1,0 +1,93 @@
+version: "3.8"
+
+# Docker Compose configuration for JustEat application
+# WHY: Orchestrates multiple services for complete development environment
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:14-alpine
+    container_name: justeat_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-justeat}
+      POSTGRES_USER: ${DB_USER:-justeat}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-justeat123}
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U justeat"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - justeat_network
+
+  # Backend service
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    container_name: justeat_api
+    environment:
+      APP_ENV: development
+      APP_DEBUG: "true"
+      APP_RELOAD: "true"
+      DATABASE_URL: postgresql://${DB_USER:-justeat}:${DB_PASSWORD:-justeat123}@postgres:5432/${DB_NAME:-justeat}
+      JWT_SECRET_KEY: ${JWT_SECRET:-your-secret-key-here-change-in-production}
+      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:8000,http://frontend:3000"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - justeat_network
+    command: bash -c "alembic upgrade head && python run.py"
+
+  # Redis Cache (for future use)
+  redis:
+    image: redis:7-alpine
+    container_name: justeat_cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - justeat_network
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: justeat_frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    networks:
+      - justeat_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  justeat_network:
+    driver: bridge
+
+# Network ports mapping:
+# - Database: 5432
+# - Backend API: 8000
+# - Redis: 6379
+# - Frontend (React): 3000
+
