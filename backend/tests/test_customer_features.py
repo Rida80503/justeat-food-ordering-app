@@ -1,3 +1,4 @@
+
 """
 Tests for customer preference, favorites, recommendation, and restaurant search endpoints.
 """
@@ -25,7 +26,13 @@ class TestCustomerFeatures:
             headers={"Authorization": f"Bearer {customer_token}"},
         )
         assert get_pref.status_code == 200
-        assert "vegetarian" in get_pref.json()["data"]["dietary_restrictions"]
+
+        dietary_restrictions = get_pref.json()["data"]["dietary_restrictions"]
+
+        assert any(
+            item.get("value") == "vegetarian"
+            for item in dietary_restrictions
+        )
 
     def test_favorites_flow(self, client, customer_token, test_restaurant):
         add = client.post(
