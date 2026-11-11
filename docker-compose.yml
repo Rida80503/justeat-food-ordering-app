@@ -1,10 +1,5 @@
-version: "3.8"
-
-# Docker Compose configuration for JustEat application
-# WHY: Orchestrates multiple services for complete development environment
 
 services:
-  # PostgreSQL Database
   postgres:
     image: postgres:14-alpine
     container_name: justeat_db
@@ -17,77 +12,63 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U justeat"]
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
       - justeat_network
 
-  # Backend service
   backend:
     build:
-      context: .
-      dockerfile: backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: justeat_api
     environment:
-      APP_ENV: development
-      APP_DEBUG: "true"
-      APP_RELOAD: "true"
+      APP_ENV: production
+      APP_DEBUG: "false"
+      APP_RELOAD: "false"
+      APP_HOST: 0.0.0.0
+      APP_PORT: 8000
+      APP_WORKERS: 2
       DATABASE_URL: postgresql://${DB_USER:-justeat}:${DB_PASSWORD:-justeat123}@postgres:5432/${DB_NAME:-justeat}
-      JWT_SECRET_KEY: ${JWT_SECRET:-your-secret-key-here-change-in-production}
-      ALLOWED_ORIGINS: "http://localhost:3000,http://localhost:8000,http://frontend:3000"
+      JWT_SECRET_KEY: ${JWT_SECRET:-local-development-secret-change-before-deployment}
+      ALLOWED_ORIGINS: "http://localhost:3000"
     ports:
       - "8000:8000"
-    volumes:
-      - ./backend:/app
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - justeat_network
-    command: bash -c "alembic upgrade head && python run.py"
-
-  # Redis Cache (for future use)
-  redis:
-    image: redis:7-alpine
-    container_name: justeat_cache
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
     healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-    networks:
-      - justeat_network
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
 
-  # React Frontend
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        VITE_API_URL: /api
     container_name: justeat_frontend
+    environment:
+      PORT: 80
+      BACKEND_URL: http://backend:8000
     ports:
       - "3000:80"
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     networks:
       - justeat_network
 
 volumes:
   postgres_data:
-  redis_data:
 
 networks:
   justeat_network:
     driver: bridge
-
-# Network ports mapping:
-# - Database: 5432
-# - Backend API: 8000
-# - Redis: 6379
-# - Frontend (React): 3000
-
