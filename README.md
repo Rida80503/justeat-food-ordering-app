@@ -161,6 +161,26 @@ cp backend/.env.example backend/.env
 
 Update the `.env` file with your PostgreSQL database credentials, JWT secret, and other required environment variables.
 
+### Default Admin Account
+
+The project includes a default platform admin bootstrap for local development. The values are defined in `backend/.env.example` and can be overridden in your local `backend/.env`:
+
+```env
+ADMIN_EMAIL=admin@example.com
+ADMIN_PASSWORD=change-this-admin-password
+ADMIN_FIRST_NAME=Admin
+ADMIN_LAST_NAME=User
+```
+
+When you run the backend seed script, it creates or upgrades this admin account automatically with `role = ADMIN` and `approval_status = APPROVED`.
+
+Login with:
+
+```text
+Email: admin@example.com
+Password: change-this-admin-password
+```
+
 ### Build and Start Containers
 
 ```bash

@@ -46,6 +46,9 @@ class AuthService:
 
         password_hash = hash_password(password)
 
+        approval_status = "APPROVED" if role == "CUSTOMER" else "PENDING"
+        is_active = role == "CUSTOMER"
+
         user = create_user(
             db=db,
             email=email,
@@ -53,11 +56,13 @@ class AuthService:
             first_name=first_name.strip(),
             last_name=last_name.strip(),
             role=role,
+            approval_status=approval_status,
+            is_active=is_active,
         )
 
-        # Public owner registrations require approval.
         if role == "OWNER":
             user.is_active = False
+            user.approval_status = "PENDING"
             db.commit()
             db.refresh(user)
 
@@ -77,11 +82,18 @@ class AuthService:
         if not user:
             raise InvalidCredentialsException()
 
-        if not user.is_active:
-            raise UserInactiveException()
-
         if not verify_password(password, user.password_hash):
             raise InvalidCredentialsException()
+
+        if user.role == "OWNER":
+            approval_state = user.approval_status or "PENDING"
+            if approval_state == "REJECTED":
+                raise UserInactiveException("Your restaurant owner application was rejected")
+            if approval_state == "PENDING" or (not user.is_active and approval_state == "APPROVED"):
+                raise UserInactiveException("Your restaurant owner account is pending approval")
+
+        if not user.is_active:
+            raise UserInactiveException("User account is inactive")
 
         # Never trust the role selected on the frontend.
         # Verify it against the role stored in the database.

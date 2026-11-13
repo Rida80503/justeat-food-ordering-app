@@ -32,6 +32,8 @@ def create_user(
     last_name: str,
     phone: str | None = None,
     role: str = "CUSTOMER",
+    approval_status: str = "APPROVED",
+    is_active: bool = True,
 ) -> User:
     """Create new user."""
 
@@ -42,7 +44,8 @@ def create_user(
         last_name=last_name,
         phone=phone,
         role=role,
-        is_active=True,
+        approval_status=approval_status,
+        is_active=is_active,
     )
 
     db.add(user)

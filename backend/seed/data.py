@@ -6,8 +6,50 @@ Run: python seed/data.py from backend/ directory
 from app.db.database import SessionLocal
 from app.models import User, Restaurant, Menu, Order, OrderItem, Cart
 from app.core.security import hash_password
+from app.core.config import settings
 from datetime import datetime, timedelta
 from app.models import CustomerPreference
+
+
+def ensure_admin_user(db):
+    """Create a default platform admin if one does not already exist."""
+    admin_email = (settings.ADMIN_EMAIL or "").strip().lower()
+    admin_password = settings.ADMIN_PASSWORD or ""
+    admin_first_name = (settings.ADMIN_FIRST_NAME or "Admin").strip()
+    admin_last_name = (settings.ADMIN_LAST_NAME or "User").strip()
+
+    if not admin_email or not admin_password:
+        raise ValueError(
+            "ADMIN_EMAIL and ADMIN_PASSWORD must be configured in backend/.env before bootstrapping the admin user."
+        )
+
+    existing_admin = db.query(User).filter(User.email == admin_email).first()
+    if existing_admin:
+        existing_admin.role = "ADMIN"
+        existing_admin.is_active = True
+        existing_admin.approval_status = "APPROVED"
+        existing_admin.first_name = admin_first_name
+        existing_admin.last_name = admin_last_name
+        db.commit()
+        print(f"Admin account ready: {admin_email}")
+        return existing_admin
+
+    admin = User(
+        email=admin_email,
+        password_hash=hash_password(admin_password),
+        first_name=admin_first_name,
+        last_name=admin_last_name,
+        phone="0000000000",
+        role="ADMIN",
+        approval_status="APPROVED",
+        is_active=True,
+    )
+    db.add(admin)
+    db.commit()
+    db.refresh(admin)
+
+    print(f"Seeded admin user: {admin_email}")
+    return admin
 
 
 def seed_database():
@@ -22,6 +64,8 @@ def seed_database():
     db.query(Cart).delete()
     db.query(Restaurant).delete()
     db.query(User).delete()
+
+    ensure_admin_user(db)
     
     # Create customers
     print("Creating customers...")

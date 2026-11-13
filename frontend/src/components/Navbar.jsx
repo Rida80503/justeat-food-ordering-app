@@ -82,10 +82,24 @@ export default function Navbar() {
               </>
             )}
 
+            {/* Admin Navigation */}
+            {user?.role === "ADMIN" && (
+              <>
+                <Link to="/admin" className="hover:text-yellow-200 transition">
+                  Dashboard
+                </Link>
+                <Link to="/admin/owners" className="hover:text-yellow-200 transition">
+                  Owner Applications
+                </Link>
+              </>
+            )}
+
             {/* Common Navigation */}
-            <Link to="/profile" className="hover:text-yellow-200 transition">
-              Profile
-            </Link>
+            {user?.role !== "ADMIN" && (
+              <Link to="/profile" className="hover:text-yellow-200 transition">
+                Profile
+              </Link>
+            )}
 
             <span className="font-semibold">
               👤 {user?.first_name}
@@ -109,6 +123,13 @@ export default function Navbar() {
               className="bg-white text-orange-500 px-5 py-2 rounded-lg font-semibold hover:bg-orange-100 transition"
             >
               Login
+            </Link>
+
+            <Link
+              to="/admin/login"
+              className="border border-white/80 text-white px-4 py-2 rounded-lg font-semibold hover:bg-white hover:text-orange-500 transition"
+            >
+              Admin
             </Link>
 
             <Link

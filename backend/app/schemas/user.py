@@ -74,6 +74,7 @@ class UserResponse(BaseModel):
     last_name: str
     phone: Optional[str] = None
     role: str
+    approval_status: str
     is_active: bool
     created_at: datetime
     updated_at: datetime

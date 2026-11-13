@@ -31,6 +31,7 @@ from app.models import (
 )
 from app.api.routes import (
     auth,
+    admin,
     restaurants,
     menus,
     carts,
@@ -177,13 +178,16 @@ async def http_exception_handler(
 ):
     """
     Return consistent JSON for expected HTTP errors.
+    Preserve FastAPI's standard detail field for client compatibility.
     """
 
+    detail = str(exc.detail)
     return JSONResponse(
         status_code=exc.status_code,
         content={
             "success": False,
-            "message": str(exc.detail),
+            "message": detail,
+            "detail": detail,
             "error_code": "HTTP_ERROR",
             "status_code": exc.status_code,
         },
@@ -210,6 +214,7 @@ async def general_exception_handler(
         content={
             "success": False,
             "message": "An unexpected error occurred",
+            "detail": "An unexpected error occurred",
             "error_code": "INTERNAL_ERROR",
             "status_code": 500,
         },
@@ -248,6 +253,7 @@ def health_check():
 # ============================================================================
 
 app.include_router(auth.router)
+app.include_router(admin.router)
 app.include_router(users.router)
 app.include_router(restaurants.router)
 app.include_router(menus.router)

@@ -168,7 +168,6 @@ async def get_current_owner_or_admin(
     Ensure current user is OWNER or ADMIN.
     
     WHY: Some operations available to both owners and platform admins.
-    (Admin role can be added later for platform management)
     
     Args:
         current_user: Current authenticated user
@@ -183,4 +182,13 @@ async def get_current_owner_or_admin(
         raise PermissionDeniedException(
             "Insufficient permissions"
         )
+    return current_user
+
+
+async def get_current_admin(
+    current_user: User = Depends(get_current_user),
+) -> User:
+    """Ensure current user has ADMIN role."""
+    if current_user.role != "ADMIN":
+        raise PermissionDeniedException("Only administrators can access this resource")
     return current_user

@@ -49,6 +49,7 @@ export const registerUser = createAsyncThunk(
 // Login
 // ============================
 
+
 export const loginUser = createAsyncThunk(
   "auth/loginUser",
   async (payload, { rejectWithValue }) => {
@@ -57,6 +58,10 @@ export const loginUser = createAsyncThunk(
 
       formData.append("username", payload.email);
       formData.append("password", payload.password);
+
+      if (payload && payload.role) {
+        formData.append("role", payload.role);
+      }
 
       const response = await api.post("/auth/login", formData, {
         headers: {
@@ -67,13 +72,14 @@ export const loginUser = createAsyncThunk(
       return response.data;
     } catch (error) {
       return rejectWithValue(
-        error.response?.data?.message ||
         error.response?.data?.detail ||
+        error.response?.data?.message ||
         "Login failed"
       );
     }
   }
 );
+
 
 // ============================
 // Forgot Password

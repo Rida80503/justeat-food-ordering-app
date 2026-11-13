@@ -19,6 +19,9 @@ const loginSchema = z.object({
   password: z
     .string()
     .min(8, "Password must be at least 8 characters"),
+  role: z.enum(["CUSTOMER", "OWNER"], {
+    required_error: "Please select a role",
+  }),
 });
 
 // ============================
@@ -45,6 +48,7 @@ export default function LoginPage() {
     defaultValues: {
       email: "",
       password: "",
+      role: "CUSTOMER",
     },
   });
 
@@ -158,6 +162,28 @@ export default function LoginPage() {
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message}
+                </p>
+              )}
+            </div>
+
+            {/* Role */}
+            <div>
+              <label className="block mb-2 font-medium">
+                Sign in as
+              </label>
+
+              <select
+                {...register("role")}
+                className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300 bg-white"
+                defaultValue="CUSTOMER"
+              >
+                <option value="CUSTOMER">Customer</option>
+                <option value="OWNER">Restaurant Owner</option>
+              </select>
+
+              {errors.role && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errors.role.message}
                 </p>
               )}
             </div>

@@ -101,10 +101,10 @@ class UserInactiveException(HTTPException):
     WHY: Raised when user account is inactive/deleted.
     Only active users can authenticate.
     """
-    def __init__(self):
+    def __init__(self, detail: str = "User account is inactive"):
         super().__init__(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="User account is inactive",
+            detail=detail,
         )
 
 

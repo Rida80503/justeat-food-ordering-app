@@ -7,6 +7,9 @@ import Navbar from "./components/Navbar";
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import AdminLoginPage from "./pages/AdminLoginPage";
+import AdminDashboardPage from "./pages/AdminDashboardPage";
+import AdminOwnersPage from "./pages/AdminOwnersPage";
 import CartPage from "./pages/CartPage";
 import OrdersPage from "./pages/OrdersPage";
 import OwnerDashboardPage from "./pages/OwnerDashboardPage";
@@ -100,7 +103,30 @@ export default function App() {
           {/* Authentication */}
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
+          <Route path="/admin/login" element={<AdminLoginPage />} />
           <Route path="/forbidden" element={<ForbiddenPage />} />
+
+          <Route
+            path="/admin"
+            element={
+              <PrivateRoute>
+                <RoleRoute allowedRoles={["ADMIN"]} redirectTo="/admin/login">
+                  <AdminDashboardPage />
+                </RoleRoute>
+              </PrivateRoute>
+            }
+          />
+
+          <Route
+            path="/admin/owners"
+            element={
+              <PrivateRoute>
+                <RoleRoute allowedRoles={["ADMIN"]} redirectTo="/admin/login">
+                  <AdminOwnersPage />
+                </RoleRoute>
+              </PrivateRoute>
+            }
+          />
 
           {/* Customer Cart */}
           <Route

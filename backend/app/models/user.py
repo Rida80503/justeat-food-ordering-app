@@ -50,6 +50,13 @@ class User(BaseModel):
         index=True,
     )
 
+    approval_status: Mapped[str] = mapped_column(
+        String(50),
+        default="APPROVED",
+        nullable=False,
+        index=True,
+    )
+
     is_active: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
@@ -96,7 +103,11 @@ class User(BaseModel):
 
     __table_args__ = (
         CheckConstraint(
-            "role IN ('CUSTOMER','OWNER')",
+            "role IN ('CUSTOMER','OWNER','ADMIN')",
             name="valid_user_role",
+        ),
+        CheckConstraint(
+            "approval_status IN ('PENDING','APPROVED','REJECTED')",
+            name="valid_approval_status",
         ),
     )
