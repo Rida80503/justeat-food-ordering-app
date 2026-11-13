@@ -6,7 +6,7 @@ JustEat is a **production-ready full-stack food ordering application** built wit
 
 ## 📂 Source Code
 
-**GitLab Repository**
+**GitLab Repository**.....
 
 https://git-training.nagarro.com/nagarro_fresher_training/general-account/rida-khan-3221674
 
