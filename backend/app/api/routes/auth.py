@@ -1,12 +1,13 @@
+
 """
-Authentication API routes (login, logout, password reset).
+Authentication API routes (registration, login, logout, password reset).
 
 WHY: Exposes authentication functionality as HTTP endpoints.
 Routes call service layer, not database directly.
 All requests/responses validated by Pydantic schemas.
 """
 
-from fastapi import APIRouter, Depends, status, Form
+from fastapi import APIRouter, Depends, status, Form, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
@@ -15,7 +16,7 @@ from app.db.database import get_db
 from app.models.user import User
 from app.schemas.common import BaseResponse
 from app.schemas.user import (
-    UserLoginRequest,
+    UserRegisterRequest,
     TokenResponse,
     UserResponse,
     PasswordResetRequestSchema,
@@ -28,10 +29,49 @@ router = APIRouter(prefix="/api/auth", tags=["authentication"])
 
 
 # ============================================================================
-# Login (Frontend)
+# Registration
 # ============================================================================
 
-from fastapi import Form
+@router.post(
+    "/register",
+    response_model=BaseResponse[UserResponse],
+    status_code=status.HTTP_201_CREATED,
+)
+async def register(
+    request: UserRegisterRequest,
+    db: Session = Depends(get_db),
+):
+    try:
+        user = AuthService.register_user(
+            db=db,
+            email=request.email,
+            password=request.password,
+            first_name=request.first_name,
+            last_name=request.last_name,
+            role=request.role,
+        )
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        )
+
+    message = (
+        "Registration successful. Your account is active."
+        if user.role == "CUSTOMER"
+        else "Registration received. Your restaurant owner account requires approval."
+    )
+
+    return BaseResponse(
+        success=True,
+        message=message,
+        data=user,
+    )
+
+
+# ============================================================================
+# Login (Frontend)
+# ============================================================================
 
 @router.post(
     "/login",
@@ -40,12 +80,14 @@ from fastapi import Form
 async def login(
     username: str = Form(...),
     password: str = Form(...),
+    role: str | None = Form(None),
     db: Session = Depends(get_db),
 ):
     token_response = AuthService.authenticate_user(
         db=db,
         email=username,
         password=password,
+        selected_role=role,
     )
 
     return BaseResponse(

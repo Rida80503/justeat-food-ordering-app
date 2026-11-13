@@ -1,3 +1,4 @@
+
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { api } from "../../utils/api";
 
@@ -17,6 +18,34 @@ try {
 }
 
 // ============================
+// Registration
+// ============================
+
+export const registerUser = createAsyncThunk(
+  "auth/registerUser",
+  async (payload, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/auth/register", {
+        first_name: payload.first_name,
+        last_name: payload.last_name,
+        email: payload.email,
+        password: payload.password,
+        confirm_password: payload.confirm_password,
+        role: payload.role,
+      });
+
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error.response?.data?.message ||
+        error.response?.data?.detail ||
+        "Registration failed"
+      );
+    }
+  }
+);
+
+// ============================
 // Login
 // ============================
 
@@ -28,26 +57,15 @@ export const loginUser = createAsyncThunk(
 
       formData.append("username", payload.email);
       formData.append("password", payload.password);
-      formData.append("scope", "");
-      formData.append("client_id", "");
-      formData.append("client_secret", "");
-      formData.append("grant_type", "");
-
-      console.log("Sending:", formData.toString());
 
       const response = await api.post("/auth/login", formData, {
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
-  },
-});
+        },
+      });
 
-console.log("Full Response:", JSON.stringify(response.data, null, 2));
-
-return response.data;
+      return response.data;
     } catch (error) {
-      console.log("Error Response:", error.response);
-      console.log("Error Data:", error.response?.data);
-
       return rejectWithValue(
         error.response?.data?.message ||
         error.response?.data?.detail ||
@@ -74,7 +92,7 @@ export const requestPasswordReset = createAsyncThunk(
       return rejectWithValue(
         error.response?.data?.message ||
         error.response?.data?.detail ||
-          "Failed to send reset token"
+        "Failed to send reset token"
       );
     }
   }
@@ -93,7 +111,8 @@ export const completePasswordReset = createAsyncThunk(
     } catch (error) {
       return rejectWithValue(
         error.response?.data?.message ||
-          "Password reset failed"
+        error.response?.data?.detail ||
+        "Password reset failed"
       );
     }
   }
@@ -111,6 +130,9 @@ const authSlice = createSlice({
     accessToken: initialToken,
     loading: false,
     error: null,
+    registrationLoading: false,
+    registrationError: null,
+    registrationMessage: null,
     isAuthenticated: !!initialToken,
   },
 
@@ -125,10 +147,40 @@ const authSlice = createSlice({
       localStorage.removeItem("access_token");
       localStorage.removeItem("user");
     },
+
+    clearRegistrationState: (state) => {
+      state.registrationError = null;
+      state.registrationMessage = null;
+    },
+
+    clearAuthError: (state) => {
+      state.error = null;
+    },
   },
 
   extraReducers: (builder) => {
     builder
+
+      // ===========================
+      // Registration
+      // ===========================
+
+      .addCase(registerUser.pending, (state) => {
+        state.registrationLoading = true;
+        state.registrationError = null;
+        state.registrationMessage = null;
+      })
+
+      .addCase(registerUser.fulfilled, (state, action) => {
+        state.registrationLoading = false;
+        state.registrationError = null;
+        state.registrationMessage = action.payload.message;
+      })
+
+      .addCase(registerUser.rejected, (state, action) => {
+        state.registrationLoading = false;
+        state.registrationError = action.payload;
+      })
 
       // ===========================
       // Login
@@ -169,6 +221,7 @@ const authSlice = createSlice({
 
       .addCase(requestPasswordReset.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
 
       .addCase(requestPasswordReset.fulfilled, (state) => {
@@ -180,8 +233,13 @@ const authSlice = createSlice({
         state.error = action.payload;
       })
 
+      // ===========================
+      // Complete Password Reset
+      // ===========================
+
       .addCase(completePasswordReset.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
 
       .addCase(completePasswordReset.fulfilled, (state) => {
@@ -195,6 +253,10 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout } = authSlice.actions;
+export const {
+  logout,
+  clearRegistrationState,
+  clearAuthError,
+} = authSlice.actions;
 
 export default authSlice.reducer;

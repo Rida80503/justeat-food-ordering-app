@@ -1,3 +1,4 @@
+
 import { Navigate, Route, Routes } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -5,6 +6,7 @@ import Navbar from "./components/Navbar";
 
 import HomePage from "./pages/HomePage";
 import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
 import CartPage from "./pages/CartPage";
 import OrdersPage from "./pages/OrdersPage";
 import OwnerDashboardPage from "./pages/OwnerDashboardPage";
@@ -23,6 +25,10 @@ import ForbiddenPage from "./pages/ForbiddenPage";
 import MyRestaurantsPage from "./pages/MyRestaurantsPage";
 import MenuManagementPage from "./pages/MenuManagementPage";
 
+// ============================
+// Private Route
+// ============================
+
 function PrivateRoute({ children }) {
   const token = useSelector((state) => state.auth.accessToken);
 
@@ -33,37 +39,47 @@ function PrivateRoute({ children }) {
   return children;
 }
 
-function RoleRoute({ children, allowedRoles, redirectTo = "/forbidden" }) {
+// ============================
+// Role-Based Route
+// ============================
+
+function RoleRoute({
+  children,
+  allowedRoles,
+  redirectTo = "/forbidden",
+}) {
   const token = useSelector((state) => state.auth.accessToken);
   const user = useSelector((state) => state.auth.user);
 
-  if (!token) {
+  if (!token || !user) {
     return <Navigate to="/login" replace />;
   }
 
-  if (allowedRoles && user?.role && !allowedRoles.includes(user.role)) {
+  if (allowedRoles && !allowedRoles.includes(user.role)) {
     return <Navigate to={redirectTo} replace />;
   }
 
   return children;
 }
 
-export default function App() {
-  const token = useSelector((state) => state.auth.accessToken);
+// ============================
+// Application Routes
+// ============================
 
+export default function App() {
   return (
     <div className="min-h-screen bg-gray-100">
-      {/* Navbar */}
       <Navbar />
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-6">
         <Routes>
+
+          {/* Customer Home */}
           <Route
             path="/"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER"]}>
                   <HomePage />
                 </RoleRoute>
               </PrivateRoute>
@@ -74,65 +90,72 @@ export default function App() {
             path="/restaurants"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER"]}>
                   <HomePage />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
 
+          {/* Authentication */}
           <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
           <Route path="/forbidden" element={<ForbiddenPage />} />
 
+          {/* Customer Cart */}
           <Route
             path="/cart"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER"]}>
                   <CartPage />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
 
+          {/* Restaurant Details */}
           <Route
             path="/restaurants/:restaurantId"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER"]}>
                   <RestaurantDetailsPage />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
 
+          {/* Orders */}
           <Route
             path="/orders"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]}>
                   <OrdersPage />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
 
+          {/* Owner Dashboard */}
           <Route
             path="/owner"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["OWNER"]}>
                   <OwnerDashboardPage />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
 
+          {/* Profile */}
           <Route
             path="/profile"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]}>
                   <ProfilePage />
                 </RoleRoute>
               </PrivateRoute>
@@ -143,7 +166,7 @@ export default function App() {
             path="/edit-profile"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]}>
                   <EditProfile />
                 </RoleRoute>
               </PrivateRoute>
@@ -154,18 +177,19 @@ export default function App() {
             path="/change-password"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]}>
                   <ChangePassword />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
 
+          {/* Customer Features */}
           <Route
             path="/favorites"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER"]}>
                   <FavoritesPage />
                 </RoleRoute>
               </PrivateRoute>
@@ -176,7 +200,7 @@ export default function App() {
             path="/recommendations"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER"]}>
                   <RecommendationsPage />
                 </RoleRoute>
               </PrivateRoute>
@@ -187,18 +211,19 @@ export default function App() {
             path="/preferences"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["CUSTOMER"]}>
                   <PreferencesPage />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
 
+          {/* Owner Restaurant Management */}
           <Route
             path="/menu-management"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["OWNER"]}>
                   <MenuManagementPage />
                 </RoleRoute>
               </PrivateRoute>
@@ -209,7 +234,7 @@ export default function App() {
             path="/my-restaurants"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["OWNER"]}>
                   <MyRestaurantsPage />
                 </RoleRoute>
               </PrivateRoute>
@@ -220,7 +245,7 @@ export default function App() {
             path="/create-restaurant"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["OWNER"]}>
                   <CreateRestaurant />
                 </RoleRoute>
               </PrivateRoute>
@@ -231,18 +256,19 @@ export default function App() {
             path="/edit-restaurant/:restaurantId"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["OWNER"]}>
                   <EditRestaurant />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
 
+          {/* Owner Menu Management */}
           <Route
             path="/create-menu"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["OWNER"]}>
                   <CreateMenu />
                 </RoleRoute>
               </PrivateRoute>
@@ -253,12 +279,13 @@ export default function App() {
             path="/edit-menu/:menuId"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["OWNER"]} redirectTo="/forbidden">
+                <RoleRoute allowedRoles={["OWNER"]}>
                   <EditMenu />
                 </RoleRoute>
               </PrivateRoute>
             }
           />
+
         </Routes>
       </main>
     </div>

@@ -47,7 +47,7 @@ class Settings(BaseSettings):
     # ------------------------------------------------------------------
     # CORS Settings
     # ------------------------------------------------------------------
-    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:5174"
+    ALLOWED_ORIGINS: str = "http://localhost:3000,http://localhost:5173,http://localhost:5174,http://127.0.0.1:3000,http://127.0.0.1:5173,http://127.0.0.1:5174"
 
     # ------------------------------------------------------------------
     # Email Settings
@@ -60,12 +60,36 @@ class Settings(BaseSettings):
 
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
     @property
     def ALLOWED_ORIGINS_LIST(self) -> list[str]:
-        """Return CORS origins as a list."""
+        """Return CORS origins as a list, stripped of whitespace and trailing slashes."""
 
-        return [origin.strip() for origin in self.ALLOWED_ORIGINS.split(",")]
+        configured_origins = [
+            value.strip().rstrip("/")
+            for value in self.ALLOWED_ORIGINS.split(",")
+            if value and value.strip()
+        ]
+
+        default_local_origins = [
+            "http://localhost:3000",
+            "http://127.0.0.1:3000",
+            "http://localhost:5173",
+            "http://127.0.0.1:5173",
+            "http://localhost:5174",
+            "http://127.0.0.1:5174",
+        ]
+
+        seen = set()
+        normalized = []
+        for origin in configured_origins + default_local_origins:
+            origin = origin.strip().rstrip("/")
+            if origin and origin not in seen:
+                seen.add(origin)
+                normalized.append(origin)
+
+        return normalized
 
 
 @lru_cache()

@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,13 +10,10 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { loginUser } from "../store/slices/authSlice";
 import ForgotPasswordModal from "../components/ForgotPasswordModal";
 
-/**
- * Zod validation schema for the login form.
- *
- * Validation Rules:
- * - Email must be in a valid format.
- * - Password must contain at least 8 characters.
- */
+// ============================
+// Validation Schema
+// ============================
+
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email"),
   password: z
@@ -23,122 +21,76 @@ const loginSchema = z.object({
     .min(8, "Password must be at least 8 characters"),
 });
 
-/**
- * LoginPage Component
- *
- * This component allows registered users
- * to sign in to the application.
- *
- * Features:
- * - Form validation using React Hook Form & Zod.
- * - User authentication using Redux.
- * - Password visibility toggle.
- * - Forgot Password modal.
- * - Displays validation and login errors.
- * - Redirects to Home page after successful login.
- *
- * @returns {JSX.Element} Login page.
- */
-export default function LoginPage() {
-  // Redux dispatch function
-  const dispatch = useDispatch();
+// ============================
+// Login Page
+// ============================
 
-  // Hook used for page navigation
+export default function LoginPage() {
+  const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Controls password visibility
   const [showPassword, setShowPassword] = useState(false);
-
-  // Controls Forgot Password modal visibility
   const [openForgot, setOpenForgot] = useState(false);
 
-  /**
-   * Authentication state from Redux.
-   *
-   * loading -> Login request status
-   * error -> Authentication error
-   * accessToken -> Logged-in user token
-   */
-  const { loading, error, accessToken } = useSelector(
+  const { loading, accessToken, user } = useSelector(
     (state) => state.auth
   );
 
-  /**
-   * React Hook Form setup.
-   *
-   * register -> Connects inputs
-   * handleSubmit -> Handles form submission
-   * errors -> Validation errors
-   */
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
   });
 
-  /**
-   * Redirect authenticated users
-   * to the Home page.
-   */
+  // Redirect already authenticated users.
   useEffect(() => {
-    if (accessToken) {
-      toast.success("Login successful");
-      navigate("/");
+    if (accessToken && user) {
+      navigate(
+        user.role === "OWNER" ? "/owner" : "/",
+        { replace: true }
+      );
     }
-  }, [accessToken, navigate]);
+  }, [accessToken, user, navigate]);
 
-  // useEffect(() => {
-  //   if (error) toast.error(String(error));
-  // }, [error]);
+  // ============================
+  // Login Handler
+  // ============================
 
-  /**
-   * Handles user login.
-   *
-   * Steps:
-   * 1. Validate form.
-   * 2. Dispatch login action.
-   * 3. Show success message.
-   * 4. Navigate to Home page.
-   * 5. Display backend errors if login fails.
-   *
-   * @param {{email:string,password:string}} data
-   */
   const onSubmit = async (data) => {
     try {
-      /**
-       * Authenticate user.
-       */
-      await dispatch(loginUser(data)).unwrap();
+      const response = await dispatch(loginUser(data)).unwrap();
 
-      // Display success notification
-      toast.success("Login successful");
+      const loggedInUser = response.data.user;
 
-      // Navigate to Home page
-      navigate("/");
+      toast.success("Login successful!");
+
+      navigate(
+        loggedInUser.role === "OWNER" ? "/owner" : "/",
+        { replace: true }
+      );
     } catch (error) {
-      console.log("Login Error:", error);
+      console.error("Login Error:", error);
 
-      // Display backend error
       toast.error(
-        error?.message ||
-          error ||
-          "Invalid email or password"
+        typeof error === "string"
+          ? error
+          : error?.message || "Invalid email or password"
       );
     }
   };
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-orange-50 px-4">
-
-        {/* ==========================
-            Login Card
-        ========================== */}
+      <div className="min-h-screen flex items-center justify-center bg-orange-50 px-4 py-8">
         <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
 
-          {/* Page Header */}
+          {/* Header */}
           <h1 className="text-3xl font-bold text-center text-orange-600">
             JustEat
           </h1>
@@ -147,15 +99,17 @@ export default function LoginPage() {
             Welcome Back 👋
           </p>
 
-          {/* ==========================
-              Login Form
-          ========================== */}
+          <p className="text-center text-gray-500 text-sm mt-1">
+            Sign in to continue
+          </p>
+
+          {/* Login Form */}
           <form
             onSubmit={handleSubmit(onSubmit)}
             className="mt-8 space-y-5"
           >
 
-            {/* Email Address */}
+            {/* Email */}
             <div>
               <label className="block mb-2 font-medium">
                 Email
@@ -164,11 +118,10 @@ export default function LoginPage() {
               <input
                 type="email"
                 {...register("email")}
-                className="w-full border rounded-lg px-4 py-3"
+                className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300"
                 placeholder="Enter your email"
               />
 
-              {/* Email Validation Error */}
               {errors.email && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.email.message}
@@ -184,33 +137,24 @@ export default function LoginPage() {
 
               <div className="relative">
                 <input
-                  type={
-                    showPassword
-                      ? "text"
-                      : "password"
-                  }
+                  type={showPassword ? "text" : "password"}
                   {...register("password")}
-                  className="w-full border rounded-lg px-4 py-3 pr-12"
+                  className="w-full border rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-orange-300"
                   placeholder="Enter your password"
                 />
 
-                {/* Show/Hide Password Button */}
                 <button
                   type="button"
-                  onClick={() =>
-                    setShowPassword(!showPassword)
-                  }
+                  onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2"
+                  aria-label={
+                    showPassword ? "Hide password" : "Show password"
+                  }
                 >
-                  {showPassword ? (
-                    <FaEyeSlash />
-                  ) : (
-                    <FaEye />
-                  )}
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
                 </button>
               </div>
 
-              {/* Password Validation Error */}
               {errors.password && (
                 <p className="text-red-500 text-sm mt-1">
                   {errors.password.message}
@@ -229,24 +173,33 @@ export default function LoginPage() {
               </button>
             </div>
 
-            {/* Login Button */}
+            {/* Submit */}
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg disabled:opacity-60"
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg disabled:opacity-60 transition"
             >
-              {loading
-                ? "Signing In..."
-                : "Sign In"}
+              {loading ? "Signing In..." : "Sign In"}
             </button>
 
           </form>
+
+          {/* Register Link */}
+          <p className="text-center text-sm text-gray-600 mt-6">
+            Don't have an account?{" "}
+            <button
+              type="button"
+              onClick={() => navigate("/register")}
+              className="text-orange-600 font-semibold hover:underline"
+            >
+              Create Account
+            </button>
+          </p>
+
         </div>
       </div>
 
-      {/* ==========================
-          Forgot Password Modal
-      ========================== */}
+      {/* Forgot Password Modal */}
       <ForgotPasswordModal
         open={openForgot}
         onClose={() => setOpenForgot(false)}
