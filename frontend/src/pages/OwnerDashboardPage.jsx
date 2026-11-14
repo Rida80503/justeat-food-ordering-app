@@ -172,7 +172,7 @@ export default function OwnerDashboardPage() {
       {/* Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl bg-white p-6 shadow-sm">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">
+          <h1 className="text-2xl font-bold text-gray-800 sm:text-3xl">
             👨‍💼 Owner Dashboard
           </h1>
           <p className="mt-1 text-gray-500">
@@ -214,7 +214,7 @@ export default function OwnerDashboardPage() {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5">
+          <div className="grid gap-4 grid-cols-2 sm:grid-cols-3 xl:grid-cols-5">
             <SummaryCard
               icon="🏪"
               label="Restaurants"

@@ -67,11 +67,14 @@ export default function LoginPage() {
   // ============================
 
   const onSubmit = async (data) => {
+    if (loading) return;
+
     try {
       const response = await dispatch(loginUser(data)).unwrap();
 
       const loggedInUser = response.data.user;
 
+      toast.dismiss();
       toast.success("Login successful!");
 
       navigate(
@@ -81,6 +84,7 @@ export default function LoginPage() {
     } catch (error) {
       console.error("Login Error:", error);
 
+      toast.dismiss();
       toast.error(
         typeof error === "string"
           ? error
@@ -91,38 +95,38 @@ export default function LoginPage() {
 
   return (
     <>
-      <div className="min-h-screen flex items-center justify-center bg-orange-50 px-4 py-8">
-        <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-8">
+      <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center bg-orange-50 px-2 py-4 sm:px-4 sm:py-6">
+        <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl sm:p-6 md:p-7">
 
           {/* Header */}
           <h1 className="text-3xl font-bold text-center text-orange-600">
             JustEat
           </h1>
 
-          <p className="text-center text-gray-500 mt-2">
+          <p className="mt-2 text-center text-gray-500">
             Welcome Back 👋
           </p>
 
-          <p className="text-center text-gray-500 text-sm mt-1">
+          <p className="mt-1 text-center text-sm text-gray-500">
             Sign in to continue
           </p>
 
           {/* Login Form */}
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="mt-8 space-y-5"
+            className="mt-4 space-y-3 sm:mt-5 sm:space-y-4"
           >
 
             {/* Email */}
             <div>
-              <label className="block mb-2 font-medium">
+              <label className="mb-1.5 block font-medium sm:mb-2">
                 Email
               </label>
 
               <input
                 type="email"
                 {...register("email")}
-                className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                className="w-full rounded-lg border border-gray-200 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-300 sm:px-4 sm:py-3"
                 placeholder="Enter your email"
               />
 
@@ -135,7 +139,7 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label className="block mb-2 font-medium">
+              <label className="mb-1.5 block font-medium sm:mb-2">
                 Password
               </label>
 
@@ -143,7 +147,7 @@ export default function LoginPage() {
                 <input
                   type={showPassword ? "text" : "password"}
                   {...register("password")}
-                  className="w-full border rounded-lg px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2.5 pr-11 focus:outline-none focus:ring-2 focus:ring-orange-300 sm:px-4 sm:py-3 sm:pr-12"
                   placeholder="Enter your password"
                 />
 
@@ -168,13 +172,13 @@ export default function LoginPage() {
 
             {/* Role */}
             <div>
-              <label className="block mb-2 font-medium">
+              <label className="mb-1.5 block font-medium sm:mb-2">
                 Sign in as
               </label>
 
               <select
                 {...register("role")}
-                className="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300 bg-white"
+                className="w-full rounded-lg border border-gray-200 bg-white px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-300 sm:px-4 sm:py-3"
                 defaultValue="CUSTOMER"
               >
                 <option value="CUSTOMER">Customer</option>
@@ -203,7 +207,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-orange-500 hover:bg-orange-600 text-white py-3 rounded-lg disabled:opacity-60 transition"
+              className="w-full rounded-lg bg-orange-500 py-2.5 text-white transition hover:bg-orange-600 disabled:opacity-60 sm:py-3"
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>

@@ -57,7 +57,7 @@ export default function AdminOwnersPage() {
             <p className="text-sm font-semibold uppercase tracking-wide text-orange-600">
               Admin Control
             </p>
-            <h1 className="mt-1 text-3xl font-bold text-gray-800">Owner Applications</h1>
+            <h1 className="mt-1 text-2xl font-bold text-gray-800 sm:text-3xl">Owner Applications</h1>
           </div>
         </div>
 

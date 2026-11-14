@@ -94,7 +94,7 @@ export default function CartPage() {
   // If we just completed an order, show success
   if (lastOrder) {
     return (
-      <div className="max-w-lg mx-auto mt-10">
+      <div className="mx-auto mt-10 w-full max-w-lg px-3">
         <OrderSuccess order={lastOrder} onDismiss={() => dispatch(clearLastOrder())} />
       </div>
     );
@@ -153,15 +153,15 @@ export default function CartPage() {
   return (
     <section className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between rounded-2xl bg-white p-6 shadow-sm">
+      <div className="flex flex-col gap-3 rounded-2xl bg-white p-4 shadow-sm sm:p-5 md:flex-row md:items-center md:justify-between md:p-6">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800">🛒 Your Cart</h1>
+          <h1 className="text-2xl font-bold text-gray-800 sm:text-3xl">🛒 Your Cart</h1>
           <p className="mt-1 text-sm text-gray-500">{items.length} item{items.length !== 1 ? "s" : ""} in cart</p>
         </div>
         {items.length > 0 && (
           <button
             onClick={handleClearCart}
-            className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 transition"
+            className="rounded-lg border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition hover:bg-red-100"
           >
             Clear Cart
           </button>
@@ -189,47 +189,49 @@ export default function CartPage() {
           {/* Items list */}
           <div className="space-y-3 lg:col-span-2">
             {items.map((item) => (
-              <div key={item.id} className="flex items-center gap-4 rounded-xl bg-white p-4 shadow-sm">
+              <div key={item.id} className="flex flex-col gap-3 rounded-xl bg-white p-4 shadow-sm sm:flex-row sm:items-center sm:gap-4">
                 {/* Icon placeholder */}
                 <div className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-xl bg-orange-50 text-2xl">
                   🍽️
                 </div>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-gray-800 truncate">{item.item_name}</p>
-                  <p className="text-sm text-orange-600 font-medium">${parseFloat(item.price).toFixed(2)} each</p>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold text-gray-800">{item.item_name}</p>
+                  <p className="text-sm font-medium text-orange-600">${parseFloat(item.price).toFixed(2)} each</p>
                 </div>
 
-                {/* Qty controls */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-between gap-3 sm:justify-end">
+                  {/* Qty controls */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => handleDecrease(item)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 font-bold text-gray-600 transition hover:bg-red-100 hover:text-red-600"
+                    >
+                      −
+                    </button>
+                    <span className="w-6 text-center font-bold text-gray-800">{item.quantity}</span>
+                    <button
+                      onClick={() => handleIncrease(item)}
+                      className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 font-bold text-gray-600 transition hover:bg-green-100 hover:text-green-600"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  {/* Subtotal */}
+                  <span className="w-16 text-right font-bold text-gray-800">
+                    ${parseFloat(item.subtotal).toFixed(2)}
+                  </span>
+
+                  {/* Remove */}
                   <button
-                    onClick={() => handleDecrease(item)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 font-bold text-gray-600 hover:bg-red-100 hover:text-red-600 transition"
+                    onClick={() => handleRemove(item)}
+                    className="ml-1 rounded-lg p-1.5 text-gray-400 transition hover:bg-red-50 hover:text-red-500"
+                    title="Remove item"
                   >
-                    −
-                  </button>
-                  <span className="w-6 text-center font-bold text-gray-800">{item.quantity}</span>
-                  <button
-                    onClick={() => handleIncrease(item)}
-                    className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 font-bold text-gray-600 hover:bg-green-100 hover:text-green-600 transition"
-                  >
-                    +
+                    ✕
                   </button>
                 </div>
-
-                {/* Subtotal */}
-                <span className="w-16 text-right font-bold text-gray-800">
-                  ${parseFloat(item.subtotal).toFixed(2)}
-                </span>
-
-                {/* Remove */}
-                <button
-                  onClick={() => handleRemove(item)}
-                  className="ml-1 rounded-lg p-1.5 text-gray-400 hover:bg-red-50 hover:text-red-500 transition"
-                  title="Remove item"
-                >
-                  ✕
-                </button>
               </div>
             ))}
           </div>

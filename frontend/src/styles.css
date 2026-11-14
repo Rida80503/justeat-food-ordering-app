@@ -1,1 +1,44 @@
 @import "tailwindcss";
+
+:root {
+    color-scheme: light;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-height: 100%;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+body {
+    font-family: Inter, "Segoe UI", sans-serif;
+    background: #f3f4f6;
+    line-height: 1.5;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+img {
+    max-width: 100%;
+    display: block;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+    max-width: 100%;
+    font: inherit;
+}
+
+@media (max-width: 640px) {
+    html {
+        font-size: 15px;
+    }
+}

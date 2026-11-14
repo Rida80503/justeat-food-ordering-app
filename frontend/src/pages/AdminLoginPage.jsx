@@ -35,6 +35,8 @@ export default function AdminLoginPage() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    if (loading) return;
+
     try {
       const response = await dispatch(
         loginUser({
@@ -47,10 +49,12 @@ export default function AdminLoginPage() {
       const loggedInUser = response?.data?.user;
 
       if (!loggedInUser || loggedInUser.role !== "ADMIN") {
+        toast.dismiss();
         toast.error("This portal is restricted to platform administrators.");
         return;
       }
 
+      toast.dismiss();
       toast.success("Admin login successful");
       navigate("/admin", { replace: true });
     } catch (error) {
@@ -59,19 +63,20 @@ export default function AdminLoginPage() {
           ? error
           : error?.message || error?.detail || "Invalid admin credentials";
 
+      toast.dismiss();
       toast.error(message);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-100 px-4 py-8">
-      <div className="w-full max-w-md rounded-2xl bg-white p-8 shadow-xl">
+    <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center bg-slate-100 px-2 py-4 sm:px-4 sm:py-6">
+      <div className="w-full max-w-md rounded-2xl bg-white p-4 shadow-xl sm:p-6 md:p-7">
         <div className="text-center">
           <h1 className="text-3xl font-bold text-orange-600">JustEat Admin</h1>
           <p className="mt-2 text-gray-500">Platform access</p>
         </div>
 
-        <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+        <form onSubmit={handleSubmit} className="mt-6 space-y-4 sm:mt-7">
           <div>
             <label className="mb-2 block font-medium text-gray-700">
               Email
@@ -80,7 +85,7 @@ export default function AdminLoginPage() {
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
-              className="w-full rounded-lg border border-gray-300 px-4 py-3 focus:outline-none focus:ring-2 focus:ring-orange-300"
+              className="w-full rounded-lg border border-gray-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-orange-300 sm:px-4 sm:py-3"
               placeholder="admin@justeat.com"
               required
             />
@@ -95,7 +100,7 @@ export default function AdminLoginPage() {
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(event) => setPassword(event.target.value)}
-                className="w-full rounded-lg border border-gray-300 px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-orange-300"
+                className="w-full rounded-lg border border-gray-300 px-3 py-2.5 pr-11 focus:outline-none focus:ring-2 focus:ring-orange-300 sm:px-4 sm:py-3 sm:pr-12"
                 placeholder="Enter password"
                 required
               />
@@ -113,7 +118,7 @@ export default function AdminLoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full rounded-lg bg-orange-500 py-3 font-semibold text-white transition hover:bg-orange-600 disabled:opacity-60"
+            className="w-full rounded-lg bg-orange-500 py-2.5 font-semibold text-white transition hover:bg-orange-600 disabled:opacity-60 sm:py-3"
           >
             {loading ? "Signing In..." : "Sign In as Admin"}
           </button>

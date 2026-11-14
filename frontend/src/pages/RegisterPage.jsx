@@ -117,9 +117,9 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-orange-50 px-4 py-8">
+    <div className="flex min-h-[calc(100vh-7rem)] items-center justify-center bg-orange-50 px-2 py-4 sm:px-4 sm:py-6">
 
-      <div className="w-full max-w-lg bg-white rounded-2xl shadow-xl p-8">
+      <div className="w-full max-w-lg rounded-2xl bg-white p-4 shadow-xl sm:p-6 md:p-7">
 
         {/* Header */}
         <h1 className="text-3xl font-bold text-center text-orange-600">
@@ -137,7 +137,7 @@ export default function RegisterPage() {
         {/* Registration Form */}
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="mt-8 space-y-5"
+          className="mt-5 space-y-4 sm:mt-6 sm:space-y-5"
         >
 
           {/* Account Type */}

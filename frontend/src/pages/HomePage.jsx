@@ -121,15 +121,15 @@ export default function HomePage() {
   return (
     <section className="space-y-6">
       {/* ── Hero ── */}
-      <div className="rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 p-8 text-white shadow-lg">
-        <h1 className="text-4xl font-bold">
+      <div className="rounded-2xl bg-gradient-to-r from-orange-500 to-red-500 p-5 text-white shadow-lg sm:p-6 md:p-8">
+        <h1 className="text-2xl font-bold sm:text-3xl md:text-4xl">
           Local favorites, delivered with confidence 🍔
         </h1>
-        <p className="mt-3 text-lg text-orange-100">
+        <p className="mt-3 text-sm text-orange-100 sm:text-base md:text-lg">
           Discover nearby restaurants and enjoy a faster path to your next meal.
         </p>
 
-        <div className="mt-6 grid gap-3 md:grid-cols-2">
+        <div className="mt-5 grid gap-3 md:mt-6 md:grid-cols-2">
           <div className="relative">
             <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">🔍</span>
             <input

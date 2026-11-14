@@ -71,10 +71,10 @@ function RoleRoute({
 
 export default function App() {
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-gray-100 text-gray-900">
       <Navbar />
 
-      <main className="max-w-7xl mx-auto px-6 py-6">
+      <main className="mx-auto w-full max-w-[1600px] px-3 py-4 sm:px-4 md:px-5 lg:px-6">
         <Routes>
 
           {/* Customer Home */}
