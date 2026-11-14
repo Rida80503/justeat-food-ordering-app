@@ -45,6 +45,7 @@ export default function Navbar() {
     <>
       <Link to="/admin" className={navBaseClass}>Dashboard</Link>
       <Link to="/admin/owners" className={navBaseClass}>Owner Applications</Link>
+      <Link to="/profile" className={navBaseClass}>Profile</Link>
     </>
   );
 

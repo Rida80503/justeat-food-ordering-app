@@ -181,7 +181,7 @@ export default function App() {
             path="/profile"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]}>
+                <RoleRoute allowedRoles={["CUSTOMER", "OWNER", "ADMIN"]}>
                   <ProfilePage />
                 </RoleRoute>
               </PrivateRoute>
@@ -192,7 +192,7 @@ export default function App() {
             path="/edit-profile"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]}>
+                <RoleRoute allowedRoles={["CUSTOMER", "OWNER", "ADMIN"]}>
                   <EditProfile />
                 </RoleRoute>
               </PrivateRoute>
@@ -203,7 +203,7 @@ export default function App() {
             path="/change-password"
             element={
               <PrivateRoute>
-                <RoleRoute allowedRoles={["CUSTOMER", "OWNER"]}>
+                <RoleRoute allowedRoles={["CUSTOMER", "OWNER", "ADMIN"]}>
                   <ChangePassword />
                 </RoleRoute>
               </PrivateRoute>
